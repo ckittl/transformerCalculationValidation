@@ -19,8 +19,8 @@ def test_grid(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) -> pp.pandap
 
     Parameters:
         tap_pos (int): Current position of the tap changer
-        p_mw (double): Current active power consumption of the load
-        sn_mva (double): Nominal apparent power to use for calculations
+        p_mw (float): Current active power consumption of the load
+        sn_mva (float): Nominal apparent power to use for calculations
         tap_side (TapSide): Side, at which the transformer's tap changer is installed
 
     Returns:

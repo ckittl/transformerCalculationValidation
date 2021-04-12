@@ -140,7 +140,7 @@ class TransformerTestBench:
                 result = extract_results(net)
 
                 # Register the results
-                out[str(tap_pos)].append((p, result))
+                out[str(tap_pos)].append({'p': p, 'result': result})
 
         return out
 

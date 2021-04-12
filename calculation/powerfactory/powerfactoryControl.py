@@ -1,9 +1,11 @@
-import decimal
-import os
-from numpy import arange
-from calculation import powerfactory
 import csv
 import datetime
+import decimal
+import os
+
+from numpy import arange
+
+from calculation import powerfactory
 
 """
 This script is meant to control the PowerFactory instance and write out the obtained results into a csv file.

@@ -1,15 +1,13 @@
-import decimal
-import logging
-
 import datetime as datetime
-from math import cos, pi, sin, sqrt, atan
+import logging
+from math import cos, pi, sin, sqrt, atan, copysign
 
 import pandapower as pp
 from numpy.ma import arange
 
 from calculation.pandapower.GridResult import GridResult
 from calculation.pandapower.ResultWriter import ResultWriter
-from calculation.pandapower.TestGrid import test_grid, TapSide
+from calculation.pandapower.TestGrid import test_grid, TapSide, TransformerModel
 
 
 def extract_results(net=None):
@@ -28,8 +26,8 @@ def extract_results(net=None):
     f_pu = v_pu * sin(net.res_bus.va_degree[1] / 180 * pi)  # Imaginary part of nodal voltage
 
     # Power at high voltage node
-    p_hv_kw = net.res_trafo.p_hv_mw * 1000.0
-    q_hv_kvar = net.res_trafo.q_hv_mvar * 1000.0
+    p_hv_kw = net.res_trafo.p_hv_mw[0] * 1000.0
+    q_hv_kvar = net.res_trafo.q_hv_mvar[0] * 1000.0
     s_hv_kva = sqrt(pow(p_hv_kw, 2) + pow(q_hv_kvar, 2))
 
     # Current at high voltage node
@@ -37,8 +35,8 @@ def extract_results(net=None):
     i_ang_hv_degree = __calc_current_angle(p_hv_kw, q_hv_kvar, 0.0)
 
     # Power at low voltage node
-    p_lv_kw = net.res_trafo.p_lv_mw * 1000.0
-    q_lv_kvar = net.res_trafo.q_lv_mvar * 1000.0
+    p_lv_kw = net.res_trafo.p_lv_mw[0] * 1000.0
+    q_lv_kvar = net.res_trafo.q_lv_mvar[0] * 1000.0
     s_lv_kva = sqrt(pow(p_lv_kw, 2) + pow(q_lv_kvar, 2))
 
     # Current at high voltage node
@@ -70,7 +68,14 @@ def __calc_current_angle(p: float = 0.0, q: float = 0.0, phi_v_degree: float = 0
     Returns:
         float: Current angle in degrees
     """
-    if p >= 0.0:
+    if p == 0.0:
+        if q == 0.0:
+            # Active and reactive power are zero. Thus assume it's angle is zero.
+            phi_s_degree = 0.0
+        else:
+            # Active power is zero, but reactive power not. Therefore, the angle is +/- 180°
+            phi_s_degree = copysign(180.0, q)
+    elif p >= 0.0:
         phi_s_degree = atan(q / p) / pi * 180.0
     else:
         phi_s_degree = atan(q / p) / pi * 180.0 + 180.0
@@ -79,10 +84,14 @@ def __calc_current_angle(p: float = 0.0, q: float = 0.0, phi_v_degree: float = 0
 
 class TransformerTestBench:
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger()
+    logger = None
 
-    def calculate(self, tap_min=-10, tap_max=10, p_min=-1.0, p_max=1.0, p_nom_mw=0.4, v_ref_kv=0.4, s_ref_mva=0.4,
-                  tap_side=TapSide.LV):
+    def __init__(self):
+        self.logger = logging.getLogger()
+
+    def calculate(self, tap_min=-10, tap_max=10, p_min=-1.0, p_max=1.0, p_nom_mw=0.4, p_step_size: float = 0.1,
+                  v_ref_kv=0.4, s_ref_mva=0.4,
+                  tap_side=TapSide.LV, transformer_model=TransformerModel.PI):
         """
         Performs a series of power flow calculations with pandapower and the transformer test bench. It iterates through
         all permissible tap positions and further sweeps the range of permissible power infeed or consumption.
@@ -96,9 +105,11 @@ class TransformerTestBench:
             p_min (float): Minimum permissible active power (negative = infeed) in p.u.
             p_max (float): Maximum permissible active power (negative = infeed) in p.u.
             p_nom_mw (float): Nominal power of the load in MW
+            p_step_size (float): Step size to use for sweeping over the range of active power
             v_ref_kv (float): Nominal voltage of the reference system in kV
             s_ref_mva (float): Nominal apparent power of the reference system in MVA
             tap_side (TapSide): Position of the tap changer
+            transformer_model (TapModel): Type of model to use for calculation
         """
         # --- General information ---
         self.logger.info(
@@ -106,9 +117,9 @@ class TransformerTestBench:
             "reference = %.2f MVA @ %.2f kV, tap side = %s" %
             (tap_min, tap_max, p_min, p_max, p_nom_mw, s_ref_mva, v_ref_kv, tap_side))
         self.logger.info("Preparing the general information")
-        tap_range = range(tap_min, tap_max)  # Range of available tap positions
-        p_range = arange(p_min, p_max,
-                         decimal.Decimal(0.1))  # Active power range in terms of dimensionless power from infeed to load
+        tap_range = range(tap_min, tap_max + 1)  # Range of available tap positions
+        p_range = arange(p_min, p_max + p_step_size,
+                         p_step_size)  # Active power range in terms of dimensionless power from infeed to load
 
         # --- Prepare the output dictionary ---
         out = {}
@@ -120,9 +131,10 @@ class TransformerTestBench:
             for p in p_range:
                 # Perform the calculation
                 self.logger.debug(
-                    "Power flow with tap position = %i and p = %.3f p.u. (%3.f MW)" % (tap_pos, p, p * p_nom_mw))
-                net = test_grid(tap_pos, p * p_nom_mw, s_ref_mva)
-                pp.runpp(net, trafo_model="pi")
+                    "Power flow with tap position = %i and p = %.3f p.u. (%3.f MW)" % (
+                        tap_pos, p, p * p_nom_mw))
+                net = test_grid(tap_pos, p * p_nom_mw, s_ref_mva, tap_side)
+                pp.runpp(net, trafo_model=transformer_model.value)
 
                 # Extract the result of this model run
                 result = extract_results(net)

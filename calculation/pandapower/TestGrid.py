@@ -1,5 +1,6 @@
-import pandapower as pp
 from enum import Enum
+
+import pandapower as pp
 
 
 class TapSide(Enum):
@@ -8,6 +9,14 @@ class TapSide(Enum):
     """
     HV = "hv"
     LV = "lv"
+
+
+class TransformerModel(Enum):
+    """
+    Permissible transformer model types for pandapower
+    """
+    PI = "pi"
+    T = "t"
 
 
 def test_grid(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) -> pp.pandapowerNet:
@@ -33,6 +42,6 @@ def test_grid(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) -> pp.pandap
     pp.create_transformer_from_parameters(net=net, hv_bus=a, lv_bus=b, sn_mva=.63, vn_hv_kv=10.0, vn_lv_kv=.4,
                                           vkr_percent=1.15873, vk_percent=4.0, pfe_kw=0.0, i0_percent=0.23810,
                                           tap_side=tap_side.value, tap_neutral=0, tap_max=10, tap_min=-10,
-                                          tap_step_percent=2.5, tap_step_degree=0., tap_pos=tap_pos)
+                                          tap_step_percent=2.5, tap_step_degree=0., tap_pos=tap_pos, numba=True)
     pp.create_load(net, bus=b, p_mw=p_mw)
     return net

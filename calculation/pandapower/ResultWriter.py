@@ -1,7 +1,7 @@
+import csv
 import logging
 import os
-import csv
-from calculation.pandapower import PandapowerControl
+
 from calculation.pandapower.GridResult import GridResult
 
 

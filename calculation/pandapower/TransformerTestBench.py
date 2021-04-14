@@ -7,7 +7,7 @@ from numpy.ma import arange
 
 from calculation.pandapower.GridResult import GridResult
 from calculation.pandapower.ResultWriter import ResultWriter
-from calculation.pandapower.TestGrid import test_grid, TapSide, TransformerModel
+from calculation.pandapower.TestGrid import test_grid_two_winding, TapSide, TransformerModel
 
 
 def extract_results(net=None):
@@ -133,7 +133,7 @@ class TransformerTestBench:
                 self.logger.debug(
                     "Power flow with tap position = %i and p = %.3f p.u. (%3.f MW)" % (
                         tap_pos, p, p * p_nom_mw))
-                net = test_grid(tap_pos, p * p_nom_mw, s_ref_mva, tap_side)
+                net = test_grid_two_winding(tap_pos, p * p_nom_mw, s_ref_mva, tap_side)
                 pp.runpp(net, trafo_model=transformer_model.value)
 
                 # Extract the result of this model run

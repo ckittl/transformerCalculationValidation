@@ -19,7 +19,7 @@ class TransformerModel(Enum):
     T = "t"
 
 
-def test_grid(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) -> pp.pandapowerNet:
+def test_grid_two_winding(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) -> pp.pandapowerNet:
     """
     This methods generates a test grid consisting of a transformer loaded with a only active power load. The
     transformer parameters are taken from real SGB Smit DTTH 630 kVA transformer
@@ -44,4 +44,38 @@ def test_grid(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) -> pp.pandap
                                           tap_side=tap_side.value, tap_neutral=0, tap_max=10, tap_min=-10,
                                           tap_step_percent=2.5, tap_step_degree=0., tap_pos=tap_pos, numba=True)
     pp.create_load(net, bus=b, p_mw=p_mw)
+    return net
+
+
+def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: float = 0.0, sn_mva: float = 0.0,
+                            with_iron_losses: bool = False) -> pp.pandapowerNet:
+    """
+    Create a test grid with a three winding transformer as well two loads at it's medium and lower voltage ports.
+
+    Parameters:
+        tap_pos (int): Current position of the tap changer
+        p_mv_mw (float): Active power loading of the medium voltage port
+        p_lv_mw (float): Active power loading of the low voltage port
+        sn_mva (float): Nominal apparent power to use for calculations
+        with_iron_losses (bool): Whether or not, iron losses should be considered
+
+    Returns:
+        pandapowerNet: A test grid with one transformer and two loads
+    """
+    net = pp.create_empty_network(sn_mva=sn_mva)
+    node_a = pp.create_bus(net=net, vn_kv=380.0, name="node_a")
+    node_b = pp.create_bus(net=net, vn_kv=110.0, name="node_b")
+    node_c = pp.create_bus(net=net, vn_kv=30.0, name="node_c")
+    iron_losses_kw = 0.0 if not with_iron_losses else 0.0  # TODO
+    i0_percent = 0.0 if not with_iron_losses else 0.0  # TODO
+    pp.create_transformer3w_from_parameters(net=net, hv_bus=node_a, mv_bus=node_b, lv_bus=node_c, vn_hv_kv=380.0,
+                                            vn_mv_kv=110.0, vn_lv_kv=30.0, sn_hv_mva=300.0, sn_mv_mva=300.0,
+                                            sn_lv_mva=100.0, vk_hv_percent=17.5, vk_mv_percent=18.0, vk_lv_percent=15.5,
+                                            vkr_hv_percent=0.166666, vkr_mv_percent=0.015, vkr_lv_percent=0.01,
+                                            pfe_kw=iron_losses_kw, i0_percent=i0_percent, shift_mv_degree=0.0,
+                                            shift_lv_degree=0.0, tap_step_percent=1.5, tap_pos=tap_pos, tap_neutral=0,
+                                            tap_min=-10, tap_max=10, name="three_winding_transformer",
+                                            tap_at_star_point=False)
+    pp.create_load(net, bus=node_b, p_mw=p_mv_mw, name="load_mv")
+    pp.create_load(net, bus=node_c, p_mw=p_lv_mw, name="load_lv")
     return net

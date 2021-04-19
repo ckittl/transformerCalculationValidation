@@ -1,4 +1,4 @@
-class GridResult:
+class GridResultTwoWinding:
     """
     Class to hold information about the results of interest of a power flow calculation obtained with pandapower
     """
@@ -29,8 +29,8 @@ class GridResult:
             p_hv_kw (float): Active power at high voltage port (in kW)
             q_hv_kvar (float): Reactive power at high voltage port (in kVAr)
             s_hv_kva (float): Apparent power at high voltage port (in kVA)
-            i_mag_hv_a (float): Port current magnitude at low voltage port (in A)
-            i_ang_hv_degree (float): Port current angle at low voltage port (in °)
+            i_mag_hv_a (float): Port current magnitude at high voltage port (in A)
+            i_ang_hv_degree (float): Port current angle at high voltage port (in °)
             p_lv_kw (float): Active power at low voltage port (in kW)
             q_lv_kvar (float): Reactive power at low voltage port (in kVAr)
             s_lv_kva (float): Apparent power at low voltage port (in kVA)

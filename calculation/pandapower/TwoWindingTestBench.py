@@ -1,16 +1,17 @@
 import datetime as datetime
-import logging
-from math import cos, pi, sin, sqrt, atan, copysign
+from math import cos, pi, sin, sqrt, atan
 
+import pandapower
 import pandapower as pp
 from numpy.ma import arange
 
-from calculation.pandapower.GridResult import GridResult
+from calculation.pandapower.GridResultTwoWinding import GridResultTwoWinding
 from calculation.pandapower.ResultWriter import ResultWriter
+from calculation.pandapower.TestBench import TestBench, __calc_current_angle
 from calculation.pandapower.TestGrid import test_grid_two_winding, TapSide, TransformerModel
 
 
-def extract_results(net=None):
+def extract_results(net: pandapower.pandapowerNet = None):
     """
     Extract results of interest from provided pandapower net
 
@@ -18,7 +19,7 @@ def extract_results(net=None):
         net (pandapowerNet): pandapower's net model, additionally carrying results of last simulation
 
     Returns:
-        GridResult: A container class holding all information of interest
+        GridResultTwoWinding: A container class holding all information of interest
     """
     # Nodal voltages at the low voltage node of the transformer
     v_pu = net.res_bus.vm_pu[1]
@@ -44,50 +45,16 @@ def extract_results(net=None):
     phi_v_lv_degree = atan(f_pu / e_pu) / pi * 180.0
     i_ang_lv_degree = __calc_current_angle(p_lv_kw, q_lv_kvar, phi_v_lv_degree)
 
-    return GridResult(e_pu=e_pu, f_pu=f_pu, v_pu=v_pu, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar, s_hv_kva=s_hv_kva,
-                      i_mag_hv_a=i_mag_hv_a,
-                      i_ang_hv_degree=i_ang_hv_degree, p_lv_kw=p_lv_kw, q_lv_kvar=q_lv_kvar, s_lv_kva=s_lv_kva,
-                      i_mag_lv_a=i_mag_lv_a, i_ang_lv_degree=i_ang_lv_degree)
+    return GridResultTwoWinding(e_pu=e_pu, f_pu=f_pu, v_pu=v_pu, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar, s_hv_kva=s_hv_kva,
+                                i_mag_hv_a=i_mag_hv_a,
+                                i_ang_hv_degree=i_ang_hv_degree, p_lv_kw=p_lv_kw, q_lv_kvar=q_lv_kvar, s_lv_kva=s_lv_kva,
+                                i_mag_lv_a=i_mag_lv_a, i_ang_lv_degree=i_ang_lv_degree)
 
 
-def __calc_current_angle(p: float = 0.0, q: float = 0.0, phi_v_degree: float = 0.0):
-    """
-    Method to calc the current's angle based on the given active and reactive power, as well as the equivalent
-    nodal voltage current. You have to make sure, that p and q are given in the same units
-
-    The arctangent "only" calculates the angle between the complex current and it's real part. This means, that
-    i = Complex(i_real, i_imag) and i' = Comples(-i_real, -i_imag) will lead to the same angle. However, for
-    power system simulation, the absolute orientation in the complex plain with regard to the positive real axis
-    is of interest. Therefore, additional 180° are added, if the real part of the current is negative.
-
-    Parameters:
-        p (float): Active power
-        q (float): Reactive power
-        phi_v_degree (float): Nodal voltage angle in degrees
-
-    Returns:
-        float: Current angle in degrees
-    """
-    if p == 0.0:
-        if q == 0.0:
-            # Active and reactive power are zero. Thus assume it's angle is zero.
-            phi_s_degree = 0.0
-        else:
-            # Active power is zero, but reactive power not. Therefore, the angle is +/- 180°
-            phi_s_degree = copysign(180.0, q)
-    elif p >= 0.0:
-        phi_s_degree = atan(q / p) / pi * 180.0
-    else:
-        phi_s_degree = atan(q / p) / pi * 180.0 + 180.0
-    return phi_v_degree - phi_s_degree
-
-
-class TransformerTestBench:
-    logging.basicConfig(level=logging.INFO)
-    logger = None
+class TwoWindingTestBench(TestBench):
 
     def __init__(self):
-        self.logger = logging.getLogger()
+        super().__init__()
 
     def calculate(self, tap_min=-10, tap_max=10, p_min=-1.0, p_max=1.0, p_nom_mw=0.4, p_step_size: float = 0.1,
                   v_ref_kv=0.4, s_ref_mva=0.4,
@@ -144,8 +111,8 @@ class TransformerTestBench:
 
         return out
 
-    def write_results(self, base_directory: str = "", file_name_suffix: str = "",
-                      time_stamp_pattern: str = "%Y%m%d-%H%M", results: dict = None):
+    def __write_results(self, base_directory: str = "", file_name_suffix: str = "",
+                        time_stamp_pattern: str = "%Y%m%d-%H%M", results: dict = None):
         """
         Iterates over a dictionary of results and writes the content to a file. The file name pattern is
         '<date_time_string of now>_<file_name_suffix>.csv'.

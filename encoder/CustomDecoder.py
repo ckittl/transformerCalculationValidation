@@ -1,4 +1,4 @@
-from calculation.pandapower.GridResult import GridResult
+from calculation.pandapower.GridResultTwoWinding import GridResultTwoWinding
 
 
 def custom_decode(dct):
@@ -7,8 +7,8 @@ def custom_decode(dct):
             'q_lv_kvar',
             's_lv_kva', 'i_mag_lv_a', 'i_ang_lv_degree')):
         # Do custom decode
-        return GridResult(dct['e_pu'], dct['f_pu'], dct['v_pu'], dct['p_hv_kw'], dct['q_hv_kvar'], dct['s_hv_kva'],
-                          dct['i_mag_hv_a'], dct['i_ang_hv_degree'], dct['p_lv_kw'], dct['q_lv_kvar'], dct['s_lv_kva'],
-                          dct['i_mag_lv_a'], dct['i_ang_lv_degree'])
+        return GridResultTwoWinding(dct['e_pu'], dct['f_pu'], dct['v_pu'], dct['p_hv_kw'], dct['q_hv_kvar'], dct['s_hv_kva'],
+                                    dct['i_mag_hv_a'], dct['i_ang_hv_degree'], dct['p_lv_kw'], dct['q_lv_kvar'], dct['s_lv_kva'],
+                                    dct['i_mag_lv_a'], dct['i_ang_lv_degree'])
     else:
         return dct

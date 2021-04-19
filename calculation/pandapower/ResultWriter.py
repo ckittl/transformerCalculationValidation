@@ -2,7 +2,7 @@ import csv
 import logging
 import os
 
-from calculation.pandapower.GridResult import GridResult
+from calculation.pandapower.GridResultTwoWinding import GridResultTwoWinding
 
 
 class ResultWriter:
@@ -45,14 +45,14 @@ class ResultWriter:
             self.file.close()
             raise e
 
-    def write_result(self, tap_pos: int = 0, p_pu: float = 0.0, result: GridResult = None):
+    def write_result(self, tap_pos: int = 0, p_pu: float = 0.0, result: GridResultTwoWinding = None):
         """
         This method writes the given result to the file.
         
         Parameters:
             tap_pos (int): Tap position, with which the result has been obtained
             p_pu (float): Relative active power, with which the result has been obtained
-            result (GridResult): Container class, that holds all results of interest
+            result (GridResultTwoWinding): Container class, that holds all results of interest
         """
         # Prepare the csv row and write it to file
         row = [

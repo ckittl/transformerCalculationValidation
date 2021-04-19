@@ -67,6 +67,7 @@ def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: flo
     node_a = pp.create_bus(net=net, vn_kv=380.0, name="node_a")
     node_b = pp.create_bus(net=net, vn_kv=110.0, name="node_b")
     node_c = pp.create_bus(net=net, vn_kv=30.0, name="node_c")
+    pp.create_ext_grid(net, bus=node_a)
     iron_losses_kw = 0.0 if not with_iron_losses else 1.875
     i0_percent = 0.0 if not with_iron_losses else 0.25
     pp.create_transformer3w_from_parameters(net=net, hv_bus=node_a, mv_bus=node_b, lv_bus=node_c, vn_hv_kv=380.0,

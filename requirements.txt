@@ -2,4 +2,5 @@ matplotlib==3.4.1
 numba==0.53.1
 numpy==1.19.4
 pandapower==2.4.0
+pytest==6.2.3
 Jupyter==1.0.0

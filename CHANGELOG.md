@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 -   Scripts to set up and control a test bench for two winding transformers in [pandapower]
+-   Scripts to set up and control a test bench for three winding transformers in [pandapower]
 -   Jupyter Notebooks to assess simulation results with [pandapower]
 -   Scripts to control a test bench in a given project within [DIgSILENT PowerFactory]
 

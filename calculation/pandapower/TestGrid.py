@@ -77,7 +77,7 @@ def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: flo
                                             pfe_kw=iron_losses_kw, i0_percent=i0_percent, shift_mv_degree=0.0,
                                             shift_lv_degree=0.0, tap_step_percent=1.5, tap_pos=tap_pos, tap_neutral=0,
                                             tap_min=-10, tap_max=10, name="three_winding_transformer",
-                                            tap_at_star_point=tap_at_star_point)
+                                            tap_at_star_point=tap_at_star_point, tap_side='hv')
     pp.create_load(net, bus=node_b, p_mw=p_mv_mw, name="load_mv")
     pp.create_load(net, bus=node_c, p_mw=p_lv_mw, name="load_lv")
     return net

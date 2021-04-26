@@ -119,7 +119,7 @@ class ThreeWindingTestBench(TestBench):
                         "Perform power flow calculation with the following parameters:\n\ttap pos = %i\n\tp_mv_mw = "
                         "%.2f MW\n\tp_lv_mw = %.2f MW" % (tap_pos, p_mv_mw, p_lv_mw))
                     net = test_grid_three_winding(tap_pos=tap_pos, p_mv_mw=p_mv_mw, p_lv_mw=p_lv_mw, sn_mva=s_ref_mva,
-                                                  with_iron_losses=False, tap_at_star_point=False)
+                                                  with_iron_losses=False, tap_at_star_point=tap_at_star_point)
                     pp.runpp(net)
 
                     # Extract the result of this model run

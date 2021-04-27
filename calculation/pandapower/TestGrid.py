@@ -48,7 +48,7 @@ def test_grid_two_winding(tap_pos=0, p_mw=0.0, sn_mva=0.0, tap_side=TapSide.HV) 
 
 
 def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: float = 0.0, sn_mva: float = 0.0,
-                            with_iron_losses: bool = False, tap_at_star_point=False) -> pp.pandapowerNet:
+                            with_main_field_losses: bool = False, tap_at_star_point=False) -> pp.pandapowerNet:
     """
     Create a test grid with a three winding transformer as well two loads at it's medium and lower voltage ports.
 
@@ -57,7 +57,7 @@ def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: flo
         p_mv_mw (float): Active power loading of the medium voltage port
         p_lv_mw (float): Active power loading of the low voltage port
         sn_mva (float): Nominal apparent power to use for calculations
-        with_iron_losses (bool): Whether or not, iron losses should be considered
+        with_main_field_losses (bool): Whether or not, main field losses should be considered
         tap_at_star_point (bool): True, if the tap changer is at the star point.
 
     Returns:
@@ -68,8 +68,8 @@ def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: flo
     node_b = pp.create_bus(net=net, vn_kv=110.0, name="node_b")
     node_c = pp.create_bus(net=net, vn_kv=30.0, name="node_c")
     pp.create_ext_grid(net, bus=node_a)
-    iron_losses_kw = 0.0 if not with_iron_losses else 1.875
-    i0_percent = 0.0 if not with_iron_losses else 0.25
+    iron_losses_kw = 0.0 if not with_main_field_losses else 1.875
+    i0_percent = 0.0 if not with_main_field_losses else 0.25
     pp.create_transformer3w_from_parameters(net=net, hv_bus=node_a, mv_bus=node_b, lv_bus=node_c, vn_hv_kv=380.0,
                                             vn_mv_kv=110.0, vn_lv_kv=30.0, sn_hv_mva=300.0, sn_mv_mva=300.0,
                                             sn_lv_mva=100.0, vk_hv_percent=17.5, vk_mv_percent=18.0, vk_lv_percent=15.5,

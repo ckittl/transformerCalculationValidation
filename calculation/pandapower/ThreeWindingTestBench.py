@@ -74,7 +74,7 @@ class ThreeWindingTestBench(TestBench):
 
     def calculate(self, tap_min: int = -10, tap_max: int = 10, s_nom_hv_mva: float = 300.0, s_nom_mv_mva: float = 300.0,
                   s_nom_lv_mva: float = 100.0, p_step_pu: float = 0.1, v_ref_kv: float = 380.0,
-                  s_ref_mva: float = 300.0,
+                  s_ref_mva: float = 300.0, with_main_field_losses: bool = False,
                   tap_at_star_point: bool = False) -> list:
         """
         Iterate over tap positions, medium and low voltage power consumption and perform the power flow calculation.
@@ -88,6 +88,7 @@ class ThreeWindingTestBench(TestBench):
             p_step_pu (float): Step size to sweep over power range with respect to the nominal voltage of the port
             v_ref_kv (float): Reference voltage of the calculation
             s_ref_mva (float): Reference apparent power of the calculation
+            with_main_field_losses (bool): True, if the main field losses may be considered
             tap_at_star_point (bool): True, if the tap changer is located at the transformers star point
         """
         # --- General information ---
@@ -119,7 +120,8 @@ class ThreeWindingTestBench(TestBench):
                         "Perform power flow calculation with the following parameters:\n\ttap pos = %i\n\tp_mv_mw = "
                         "%.2f MW\n\tp_lv_mw = %.2f MW" % (tap_pos, p_mv_mw, p_lv_mw))
                     net = test_grid_three_winding(tap_pos=tap_pos, p_mv_mw=p_mv_mw, p_lv_mw=p_lv_mw, sn_mva=s_ref_mva,
-                                                  with_iron_losses=False, tap_at_star_point=tap_at_star_point)
+                                                  with_main_field_losses=with_main_field_losses,
+                                                  tap_at_star_point=tap_at_star_point)
                     pp.runpp(net)
 
                     # Extract the result of this model run

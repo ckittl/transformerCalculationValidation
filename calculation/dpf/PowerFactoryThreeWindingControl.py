@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -5,6 +6,8 @@ import powerfactory
 from numpy import arange
 
 from calculation.TestHelper import permissible_power_range_lv
+from calculation.result.GridResultThreeWinding import GridResultThreeWinding
+from encoder.DictEncoder import DictEncoder
 from util.SeverityLevel import SeverityLevel
 
 """
@@ -53,6 +56,10 @@ file_handler.setLevel(level=logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
+# Prepare information about output file
+result_directory = os.path.join("..", "..", "validation", "results", "three_winding")
+result_file = os.path.join(result_directory, "dpf_withMainFieldLosses.json")
+
 # Get the PowerFactory object
 dpf = {'app': powerfactory.GetApplication()}
 dpf['active_project'] = dpf['app'].GetActiveProject()
@@ -82,7 +89,9 @@ log(SeverityLevel.INFO,
 log(SeverityLevel.WARNING,
     "Attention, this script assumes, that s_rated_mv <= s_rated_hv and s_rated_lv <= s_rated_hv holds true.")
 
+node_mv = dpf['app'].GetCalcRelevantObjects("node_b.ElmTerm")[0]
 load_mv = dpf['app'].GetCalcRelevantObjects("load_mv.ElmLod")[0]
+node_lv = dpf['app'].GetCalcRelevantObjects("node_c.ElmTerm")[0]
 load_lv = dpf['app'].GetCalcRelevantObjects("load_lv.ElmLod")[0]
 log(SeverityLevel.INFO, "Load at medium voltage port: %s" % str(load_mv))
 log(SeverityLevel.INFO, "Load at low voltage port: %s" % str(load_lv))
@@ -95,6 +104,7 @@ p_mv_range = arange(-sr_mv_mva, sr_mv_mva + delta_p_mv, delta_p_mv)
 
 # Performing the calculations
 log(SeverityLevel.INFO, "Starting the power flow calculations")
+results = []
 for tap_pos in tap_range:
     log(SeverityLevel.INFO, "Sweeping through power consumption for tap position %i." % tap_pos)
 
@@ -117,5 +127,48 @@ for tap_pos in tap_range:
                 log(SeverityLevel.ERROR,
                     "Power flow calculation failed for tap_pos = %i, p_mv = %.3f MW, p_lv = %.3f MW" % (
                         tap_pos, p_mv_mw, p_lv_mw))
-            # TODO: Extract all the needed information
-# TODO Write results to json file
+
+            # Collecting all relevant results from simulation
+            v_mv_pu = node_mv.GetAttribute("m:u")  # All nodal voltages in p.u.
+            e_mv_pu = node_mv.GetAttribute("m:ur")
+            f_mv_pu = node_mv.GetAttribute("m:ui")
+            v_lv_pu = node_lv.GetAttribute("m:u")
+            e_lv_pu = node_lv.GetAttribute("m:ur")
+            f_lv_pu = node_lv.GetAttribute("m:ui")
+
+            p_hv_kw = transformer.GetAttribute("m:Psum:bushv") * 1000  # Comes in MW
+            q_hv_kvar = transformer.GetAttribute("m:Qsum:bushv") * 1000  # Comes in MVAr
+            s_hv_kva = transformer.GetAttribute("m:Ssum:bushv") * 1000  # Comes in MVA
+            i_mag_hv_a = transformer.GetAttribute("m:I:bushv") * 1000  # Comes in kA
+            i_ang_hv_degree = transformer.GetAttribute("m:phii:bushv")  # Comes in degree
+            p_mv_kw = transformer.GetAttribute("m:Psum:busmv") * 1000
+            q_mv_kvar = transformer.GetAttribute("m:Qsum:busmv") * 1000
+            s_mv_kva = transformer.GetAttribute("m:Ssum:busmv") * 1000
+            i_mag_mv_a = transformer.GetAttribute("m:I:busmv") * 1000
+            i_ang_mv_degree = transformer.GetAttribute("m:phii:busmv")
+            p_lv_kw = transformer.GetAttribute("m:Psum:buslv") * 1000
+            q_lv_kvar = transformer.GetAttribute("m:Qsum:buslv") * 1000
+            s_lv_kva = transformer.GetAttribute("m:Ssum:buslv") * 1000
+            i_mag_lv_a = transformer.GetAttribute("m:I:buslv") * 1000
+            i_ang_lv_degree = transformer.GetAttribute("m:phii:buslv")
+
+            result = GridResultThreeWinding(v_mv_pu=v_mv_pu, e_mv_pu=e_mv_pu, f_mv_pu=f_mv_pu, v_lv_pu=v_lv_pu,
+                                            e_lv_pu=e_lv_pu, f_lv_pu=f_lv_pu, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar,
+                                            s_hv_kva=s_hv_kva, i_mag_hv_a=i_mag_hv_a, i_ang_hv_degree=i_ang_hv_degree,
+                                            p_mv_kw=p_mv_kw, q_mv_kvar=q_mv_kvar, s_mv_kva=s_mv_kva,
+                                            i_mag_mv_a=i_mag_mv_a, i_ang_mv_degree=i_ang_mv_degree, p_lv_kw=p_lv_kw,
+                                            q_lv_kvar=q_lv_kvar, s_lv_kva=s_lv_kva, i_mag_lv_a=i_mag_lv_a,
+                                            i_ang_lv_degree=i_ang_lv_degree)
+            results.append({
+                'tap_pos': tap_pos,
+                'p_mv': p_mv_mw,
+                'p_lv': p_lv_mw,
+                'result': result
+            })
+
+log(SeverityLevel.INFO,
+    "Successfully performed %i power flow calculations. Dum results into '%s'." % (len(results), ""))
+if not os.path.exists(result_directory):
+    os.makedirs(result_directory)
+with open(result_file, "w") as file_to_write_to:
+    json.dump(results, file_to_write_to, cls=DictEncoder, indent=2)

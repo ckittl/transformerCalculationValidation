@@ -23,6 +23,7 @@ As already stated, you are not able to select a virtual environment as Python in
 Thus, you need to have all required dependencies ready within your host machine's Python installation.
 As of now they are:
 -   `numpy`
+-   `json`
 
 Moreover, due to search path's root being the executed script, you need to install this package to your local Python
 installation. This is, because we use code that is shared among different simulator control scripts.

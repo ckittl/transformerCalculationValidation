@@ -7,8 +7,8 @@ from numpy import arange
 
 from tcv.calculation.TestHelper import permissible_power_range_lv
 from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
-from tcv.encoder import DictEncoder
-from tcv.util import SeverityLevel
+from tcv.encoder.DictEncoder import DictEncoder
+from tcv.util.SeverityLevel import SeverityLevel
 
 """
 This script controls a DIgSILENT PowerFactory instance with the objective to test the behavior of a modeled three
@@ -47,7 +47,7 @@ logger.setLevel(level=logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s,%(msecs)d %(name)s %(levelname)s - %(message)s')
 
 # Create a file handler
-log_directory = os.path.join("..", "..", "log")
+log_directory = os.path.join("..", "..", "..", "log")
 if not os.path.exists(log_directory):
     os.makedirs(log_directory)
 log_file = os.path.join(log_directory, "dpf_three_winding_testbench.log")
@@ -57,7 +57,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 # Prepare information about output file
-result_directory = os.path.join("..", "..", "validation", "results", "three_winding")
+result_directory = os.path.join("..", "..", "..", "results", "three_winding")
 result_file = os.path.join(result_directory, "dpf_withMainFieldLosses.json")
 
 # Get the PowerFactory object

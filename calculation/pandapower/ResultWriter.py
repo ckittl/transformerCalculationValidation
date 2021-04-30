@@ -1,8 +1,8 @@
 import csv
-import logging
+import util
 import os
 
-from calculation.pandapower.GridResultTwoWinding import GridResultTwoWinding
+from calculation.result.GridResultTwoWinding import GridResultTwoWinding
 
 
 class ResultWriter:
@@ -12,7 +12,7 @@ class ResultWriter:
     correct form
     """
 
-    logger = logging.getLogger()
+    logger = util.getLogger()
     file = None
     csv_writer = None
     header = [

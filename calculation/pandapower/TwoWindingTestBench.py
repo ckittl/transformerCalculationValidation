@@ -5,7 +5,7 @@ import pandapower
 import pandapower as pp
 from numpy.ma import arange
 
-from calculation.pandapower.GridResultTwoWinding import GridResultTwoWinding
+from calculation.result.GridResultTwoWinding import GridResultTwoWinding
 from calculation.pandapower.ResultWriter import ResultWriter
 from calculation.pandapower.TestBench import TestBench, __calc_current_angle
 from calculation.pandapower.TestGrid import test_grid_two_winding, TapSide, TransformerModel

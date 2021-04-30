@@ -1,9 +1,10 @@
-from math import ceil, floor, cos, pi, sin, sqrt, atan
+from math import cos, pi, sin, sqrt, atan
 
 import pandapower as pp
 from numpy import arange, ndarray
 
-from calculation.pandapower.GridResultThreeWinding import GridResultThreeWinding
+from calculation import TestHelper
+from calculation.result.GridResultThreeWinding import GridResultThreeWinding
 from calculation.pandapower.TestBench import TestBench, __calc_current_angle
 from calculation.pandapower.TestGrid import test_grid_three_winding
 
@@ -108,9 +109,9 @@ class ThreeWindingTestBench(TestBench):
             # --- Iterate over medium voltage load ---
             for p_mv_mw in arange(-s_nom_mv_mva, s_nom_mv_mva + p_step_mv_mva, p_step_mv_mva):
                 # --- Figure out permissible power range for low voltage load and iterate over it
-                p_lv_range_mw: ndarray = ThreeWindingTestBench.__permissible_power_range_lv(s_nom_hv_mva, s_nom_lv_mva,
-                                                                                            p_mv_mw,
-                                                                                            p_step_lv_mva)
+                p_lv_range_mw: ndarray = TestHelper.permissible_power_range_lv(s_nom_hv_mva, s_nom_lv_mva,
+                                                                               p_mv_mw,
+                                                                               p_step_lv_mva)
                 self.logger.debug(
                     "Power range for low voltage load is from %.2f...%.2f MW (medium voltage load is at %.2f MW)" % (
                         min(p_lv_range_mw), max(p_lv_range_mw), p_mv_mw))
@@ -131,27 +132,3 @@ class ThreeWindingTestBench(TestBench):
                     out.append({'tap_pos': tap_pos, 'p_mv': p_mv_mw, 'p_lv': p_lv_mw, 'result': result})
                 # --- Register the results to mv loop ---
         return out
-
-    @staticmethod
-    def __permissible_power_range_lv(s_nom_hv_mva: float = 0.0, s_nom_lv_mva: float = 0.0, p_mv_mw: float = 0.0,
-                                     p_step_mw: float = 0.0) -> ndarray:
-        """
-        Determine the permissible power range, that the low voltage load can cover, without violating the rated power of
-        the high voltage port together with the medium voltage load. The range is truncated to cover multiples of step
-        size around 0 kW.
-
-        Parameters:
-            s_nom_hv_mva (float): Rated power of the high voltage port
-            s_nom_lv_mva (float): Rated power of the low voltage port
-            p_mv_mw (float): Foreseen power consumption at the medium voltage port
-            p_step_mw (float): Step size to use, when sweeping over the power range
-
-        Returns:
-            power_range (ndarray): Range of active power to sweep
-        """
-        p_min_mw: float = max(-s_nom_lv_mva, -(p_mv_mw + s_nom_hv_mva))
-        p_min_mw = ceil(p_min_mw / p_step_mw) * p_step_mw
-        p_max_mw: float = min(s_nom_lv_mva, s_nom_hv_mva - p_mv_mw)
-        p_max_mw = floor(p_max_mw / p_step_mw) * p_step_mw
-
-        return arange(p_min_mw, p_max_mw + p_step_mw, p_step_mw)

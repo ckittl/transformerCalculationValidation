@@ -1,5 +1,5 @@
-from calculation.pandapower.GridResultThreeWinding import GridResultThreeWinding
-from calculation.pandapower.GridResultTwoWinding import GridResultTwoWinding
+from calculation.result.GridResultThreeWinding import GridResultThreeWinding
+from calculation.result.GridResultTwoWinding import GridResultTwoWinding
 
 
 def custom_decode(dct):

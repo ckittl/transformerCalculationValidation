@@ -3,10 +3,10 @@ from math import cos, pi, sin, sqrt, atan
 import pandapower as pp
 from numpy import arange, ndarray
 
-from calculation import TestHelper
-from calculation.result.GridResultThreeWinding import GridResultThreeWinding
-from calculation.pandapower.TestBench import TestBench, __calc_current_angle
-from calculation.pandapower.TestGrid import test_grid_three_winding
+from tcv.calculation import TestHelper
+from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
+from tcv.calculation.pandapower.TestBench import TestBench, __calc_current_angle
+from tcv.calculation.pandapower import test_grid_three_winding
 
 
 def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:

@@ -1,5 +1,5 @@
-from calculation.result.GridResultThreeWinding import GridResultThreeWinding
-from calculation.result.GridResultTwoWinding import GridResultTwoWinding
+from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
+from tcv.calculation.result import GridResultTwoWinding
 
 
 def custom_decode(dct):

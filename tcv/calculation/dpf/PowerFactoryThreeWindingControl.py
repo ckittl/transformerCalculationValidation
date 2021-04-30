@@ -5,10 +5,10 @@ import os
 import powerfactory
 from numpy import arange
 
-from calculation.TestHelper import permissible_power_range_lv
-from calculation.result.GridResultThreeWinding import GridResultThreeWinding
-from encoder.DictEncoder import DictEncoder
-from util.SeverityLevel import SeverityLevel
+from tcv.calculation.TestHelper import permissible_power_range_lv
+from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
+from tcv.encoder import DictEncoder
+from tcv.util import SeverityLevel
 
 """
 This script controls a DIgSILENT PowerFactory instance with the objective to test the behavior of a modeled three

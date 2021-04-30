@@ -1,8 +1,8 @@
 import csv
-import util
+import logging
 import os
 
-from calculation.result.GridResultTwoWinding import GridResultTwoWinding
+from tcv.calculation.result import GridResultTwoWinding
 
 
 class ResultWriter:
@@ -12,7 +12,7 @@ class ResultWriter:
     correct form
     """
 
-    logger = util.getLogger()
+    logger = logging.getLogger()
     file = None
     csv_writer = None
     header = [

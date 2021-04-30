@@ -16,7 +16,7 @@ with version 2021 SP 2).
 Please point PowerFactory to a directory of your desired Python interpreter.
 Note, that choosing a version here has some drawbacks (cf. next section).
 
-![](doc/figures/dpf_python_interpreter.png)
+![](docs/figures/dpf_python_interpreter.png)
 
 ### Have dependencies ready on your host machine.
 As already stated, you are not able to select a virtual environment as Python interpreter.
@@ -45,4 +45,4 @@ python -m pip uninstall tcv
 You may find the control script object `TestBenchControl.ComPython` in the project's library at path `Scripts`.
 Please make sure, that you have properly configured the object.
 
-![](doc/figures/dpf_script_object.png)
+![](docs/figures/dpf_script_object.png)

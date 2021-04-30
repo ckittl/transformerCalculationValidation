@@ -1,7 +1,7 @@
 from numpy import arange
 from numpy.testing import assert_array_equal
 
-from calculation.pandapower.ThreeWindingTestBench import ThreeWindingTestBench
+from tcv.calculation.pandapower.ThreeWindingTestBench import ThreeWindingTestBench
 
 
 def test_lv_power_range_not_truncated():

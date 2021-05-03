@@ -107,6 +107,7 @@ log(SeverityLevel.INFO, "Starting the power flow calculations")
 results = []
 for tap_pos in tap_range:
     log(SeverityLevel.INFO, "Sweeping through power consumption for tap position %i." % tap_pos)
+    transformer.SetAttribute('n3tap_h', tap_pos)
 
     # Sweep through medium voltage power
     for p_mv_mw in p_mv_range:
@@ -167,7 +168,7 @@ for tap_pos in tap_range:
             })
 
 log(SeverityLevel.INFO,
-    "Successfully performed %i power flow calculations. Dum results into '%s'." % (len(results), ""))
+    "Successfully performed %i power flow calculations. Dum results into '%s'." % (len(results), str(result_file)))
 if not os.path.exists(result_directory):
     os.makedirs(result_directory)
 with open(result_file, "w") as file_to_write_to:

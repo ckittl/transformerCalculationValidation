@@ -73,7 +73,7 @@ def test_grid_three_winding(tap_pos: int = 0, p_mv_mw: float = 0.0, p_lv_mw: flo
     pp.create_transformer3w_from_parameters(net=net, hv_bus=node_a, mv_bus=node_b, lv_bus=node_c, vn_hv_kv=380.0,
                                             vn_mv_kv=110.0, vn_lv_kv=30.0, sn_hv_mva=300.0, sn_mv_mva=300.0,
                                             sn_lv_mva=100.0, vk_hv_percent=17.5, vk_mv_percent=18.0, vk_lv_percent=15.5,
-                                            vkr_hv_percent=0.166666, vkr_mv_percent=0.015, vkr_lv_percent=0.01,
+                                            vkr_hv_percent=0.15, vkr_mv_percent=0.12, vkr_lv_percent=0.09,
                                             pfe_kw=iron_losses_kw, i0_percent=i0_percent, shift_mv_degree=0.0,
                                             shift_lv_degree=0.0, tap_step_percent=1.5, tap_pos=tap_pos, tap_neutral=0,
                                             tap_min=-10, tap_max=10, name="three_winding_transformer",

@@ -4,9 +4,9 @@ import pandapower as pp
 from numpy import arange, ndarray
 
 from tcv.calculation import TestHelper
+from tcv.calculation.pandapower.TestGrid import test_grid_three_winding
 from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
 from tcv.calculation.pandapower.TestBench import TestBench, __calc_current_angle
-from tcv.calculation.pandapower import test_grid_three_winding
 
 
 def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:

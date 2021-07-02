@@ -51,3 +51,18 @@ class TimeSeriesResult:
             len(list(itertools.chain(*self.load_results.values()))),
             len(list(itertools.chain(*self.transformer_2w_results.values()))),
             len(list(itertools.chain(*self.transformer_3w_results.values()))))
+
+    def join(self, that):
+        """
+        Join the other results into this one
+
+        :param that: The other result to incorporate
+        """
+        for time_step, result in that.node_results:
+            self.node_results[time_step].append(result)
+        for time_step, result in that.load_results:
+            self.load_results[time_step].append(result)
+        for time_step, result in that.transformer_2w_results:
+            self.transformer_2w_results[time_step].append(result)
+        for time_step, result in that.transformer_3w_results:
+            self.transformer_3w_results[time_step].append(result)

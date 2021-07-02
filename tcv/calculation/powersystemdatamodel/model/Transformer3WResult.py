@@ -14,9 +14,9 @@ class Transformer3WResult:
     i_a_ang_degree: float = 0.0
     i_b_ang_degree: float = 0.0
     i_c_ang_degree: float = 0.0
-    i_a_mag_pu: float = 0.0
-    i_b_mag_pu: float = 0.0
-    i_c_mag_pu: float = 0.0
+    i_a_mag_ampere: float = 0.0
+    i_b_mag_ampere: float = 0.0
+    i_c_mag_ampere: float = 0.0
     tap_pos: int = 0
 
 

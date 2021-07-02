@@ -3,8 +3,8 @@ import itertools
 import os
 from collections import defaultdict
 
-from tcv.calculation.simona.model import LoadResult
-from tcv.calculation.simona.model import NodeResult, Transformer3WResult
+from tcv.calculation.powersystemdatamodel.model import LoadResult
+from tcv.calculation.powersystemdatamodel.model import NodeResult, Transformer3WResult
 
 
 class TimeSeriesResult:

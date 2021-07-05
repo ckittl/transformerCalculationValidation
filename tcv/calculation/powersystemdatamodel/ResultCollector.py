@@ -1,15 +1,54 @@
+import re
 from datetime import timedelta
-from uuid import UUID
-
 from typing import List
+from uuid import UUID
 
 from tcv.calculation.powersystemdatamodel import ResultConverter
 from tcv.calculation.powersystemdatamodel.model.TimeSeriesResult import TimeSeriesResult
 from tcv.exception.ResultCollectionException import ResultCollectionException
 
 
-def collect(base_directory: str, node_a: UUID, node_b: UUID, node_c: UUID, load_mv: UUID, load_lv: UUID,
-            v_rated_hv: float, v_rated_mv: float, v_rated_lv: float, tap_pos: int) -> List[dict]:
+def tap_pos_to_base_directory(tap_pos_range: range, pattern: str):
+    """
+    Builds a mapping from tap position to base directory name. The pattern has to contain '%i' at the place, where the
+    tap position is supposed to be inserted
+
+    :param tap_pos_range: The range of tap changer positions, that shall be investigated
+    :param pattern: base directory pattern
+    """
+    mapping = {}
+    for tap_pos in tap_pos_range:
+        mapping[tap_pos] = re.sub('%i', str(tap_pos), pattern)
+    return mapping
+
+
+def collect(tap_to_base_directory: dict, node_a: UUID, node_b: UUID, node_c: UUID, load_mv: UUID, load_lv: UUID,
+            v_rated_hv: float, v_rated_mv: float, v_rated_lv: float) -> List[dict]:
+    """
+    Gather all results from a mapping from tap position to base directory and add them to a flat list
+
+    :param tap_to_base_directory: Mapping from tap changer position to base directory
+    :param node_a: Unique identifier of the highest voltage node
+    :param node_b: Unique identifier of the medium voltage node
+    :param node_c: Unique identifier of the low voltage node
+    :param load_mv: Unique identifier of the medium voltage load
+    :param load_lv: Unique identifier of the low voltage node
+    :param v_rated_hv: Rated voltage magnitude of the highest voltage node
+    :param v_rated_mv: Rated voltage magnitude of the medium voltage node
+    :param v_rated_lv: Rated voltage magnitude of the low voltage node
+    """
+    results = []
+    for tap_pos in tap_to_base_directory:
+        base_directory = tap_to_base_directory[tap_pos]
+        results.extend(
+            _collect(base_directory=base_directory, node_a=node_a, node_b=node_b, node_c=node_c, load_mv=load_mv,
+                     load_lv=load_lv, v_rated_hv=v_rated_hv, v_rated_mv=v_rated_mv, v_rated_lv=v_rated_lv,
+                     tap_pos=tap_pos))
+    return results
+
+
+def _collect(base_directory: str, node_a: UUID, node_b: UUID, node_c: UUID, load_mv: UUID, load_lv: UUID,
+             v_rated_hv: float, v_rated_mv: float, v_rated_lv: float, tap_pos: int) -> List[dict]:
     """
     Collects together all results and brings them into the form, that is used for result comparison
 
@@ -44,11 +83,11 @@ def collect(base_directory: str, node_a: UUID, node_b: UUID, node_c: UUID, load_
         grid_result = time_to_pf[pf_time]
 
         results.append({
-                'tap_pos': tap_pos,
-                'p_mv': p_mv_mw,
-                'p_lv': p_lv_mw,
-                'result': grid_result
-            })
+            'tap_pos': tap_pos,
+            'p_mv': p_mv_mw,
+            'p_lv': p_lv_mw,
+            'result': grid_result
+        })
 
     return results
 
@@ -71,7 +110,7 @@ def _map_time_to_power(load_results: dict, load_mv: UUID, load_lv: UUID) -> dict
 
             time_to_power[time_step] = (p_mv_mw, p_lv_mw)
         else:
-            raise ResultCollectionException("I need two power results, but found %i.", len(powers))
+            raise ResultCollectionException("I need two power results, but found %i." % len(powers))
     return time_to_power
 
 

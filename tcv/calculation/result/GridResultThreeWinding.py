@@ -79,5 +79,6 @@ class GridResultThreeWinding:
         self.i_ang_lv_degree = i_ang_lv_degree
 
     def __str__(self):
-        return "GridResultThreeWinding{p_mv=%.4f, p_lv=%.3f, v_mv=%.3f, v_lv=%.3f}" % (
-        self.p_mv_kw, self.p_lv_kw, self.v_mv_pu, self.v_lv_pu)
+        string = "GridResultThreeWinding{p_mv=%.4f, p_lv=%.3f, v_mv=%.3f, v_lv=%.3f}" % (
+            self.p_mv_kw, self.p_lv_kw, self.v_mv_pu, self.v_lv_pu)
+        return string

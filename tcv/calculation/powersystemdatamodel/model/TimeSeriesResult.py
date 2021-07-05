@@ -13,6 +13,16 @@ class TimeSeriesResult:
     transformer_2w_results: dict = defaultdict(list)
     transformer_3w_results: dict = defaultdict(list)
 
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls)
+
+        obj.node_results = defaultdict(list)
+        obj.load_results = defaultdict(list)
+        obj.transformer_2w_results = defaultdict(list)
+        obj.transformer_3w_results = defaultdict(list)
+
+        return obj
+
     def __init__(self, base_directory: str, delimiter: str = ','):
         node_result_file = os.path.join(base_directory, "node_res.csv")
         load_result_file = os.path.join(base_directory, "load_res.csv")
@@ -38,7 +48,7 @@ class TimeSeriesResult:
         #             transformer_result = LoadResult.from_dict(dct)
         #             self.load_results[transformer_result.time].append(transformer_result)
 
-        # Handling the load results
+        # Handling the transformer three winding results
         if os.path.exists(transformer_3w_result_file):
             with open(transformer_3w_result_file, mode='r') as transformer_3w_lines:
                 for dct in csv.DictReader(transformer_3w_lines, delimiter=delimiter):

@@ -2,3 +2,4 @@ numpy==1.19.4
 pandapower==2.4.0
 python-dateutil~=2.8.1
 pytest~=6.2.3
+matplotlib~=3.4.2

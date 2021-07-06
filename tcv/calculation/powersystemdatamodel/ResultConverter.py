@@ -1,8 +1,8 @@
-from math import cos, radians, sin
+from math import cos, radians, sin, sqrt
 
-from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
 from tcv.calculation.powersystemdatamodel.model.NodeResult import NodeResult
 from tcv.calculation.powersystemdatamodel.model.Transformer3WResult import Transformer3WResult
+from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
 
 
 def to_three_winding_result(node_result_a: NodeResult, node_result_b: NodeResult, node_result_c: NodeResult,
@@ -101,7 +101,7 @@ def _calculate_power(v_mag_pu: float, v_ang_degree: float, i_mag_ampere: float, 
     :param i_ang_degree: Angle of the port current
     :param v_nom_kv: Nominal voltage to apply
     """
-    s_kva = v_nom_kv * v_mag_pu * i_mag_ampere
+    s_kva = sqrt(3) * v_nom_kv * v_mag_pu * i_mag_ampere
     s_ang_rad = radians(v_ang_degree - i_ang_degree)
     p_kw = s_kva * cos(s_ang_rad)
     q_kvar = s_kva * sin(s_ang_rad)

@@ -1,6 +1,6 @@
 import re
 from datetime import timedelta
-from typing import List
+from typing import List, Dict
 from uuid import UUID
 
 from tcv.calculation.powersystemdatamodel import ResultConverter
@@ -8,7 +8,7 @@ from tcv.calculation.powersystemdatamodel.model.TimeSeriesResult import TimeSeri
 from tcv.exception.ResultCollectionException import ResultCollectionException
 
 
-def tap_pos_to_base_directory(tap_pos_range: range, pattern: str):
+def tap_pos_to_base_directory(tap_pos_range: range, pattern: str) -> Dict[int, str]:
     """
     Builds a mapping from tap position to base directory name. The pattern has to contain '%i' at the place, where the
     tap position is supposed to be inserted
@@ -104,9 +104,9 @@ def _map_time_to_power(load_results: dict, load_mv: UUID, load_lv: UUID) -> dict
     for time_step in load_results.keys():
         powers = load_results[time_step]
         if len(powers) == 2:
-            # The result contains power in kW
-            p_mv_mw = next(result.p * 1e3 for result in powers if result.input_model == load_mv)
-            p_lv_mw = next(result.p * 1e3 for result in powers if result.input_model == load_lv)
+            # The result contains power in kW and is supposed to be MW
+            p_mv_mw = next(result.p_mw for result in powers if result.input_model == load_mv)
+            p_lv_mw = next(result.p_mw for result in powers if result.input_model == load_lv)
 
             time_to_power[time_step] = (p_mv_mw, p_lv_mw)
         else:

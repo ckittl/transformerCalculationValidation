@@ -20,19 +20,15 @@ def to_three_winding_result(node_result_a: NodeResult, node_result_b: NodeResult
     :param v_rated_mv: Rated nodal voltage at medium voltage port
     :param v_rated_lv: Rated nodal voltage at lowest voltage port
     """
-    v_b_pu, e_b_pu, f_b_pu = _convert_nodal_results(node_result_b)
-    v_c_pu, e_c_pu, f_c_pu = _convert_nodal_results(node_result_c)
     s_a_kva, p_a_kw, q_a_kvar, s_b_kva, p_b_kw, q_b_kvar, s_c_kva, p_c_kw, q_c_kvar = _convert_transformer_3w_result(
         hv_node_result=node_result_a, mv_node_result=node_result_b, lv_node_result=node_result_c,
         transformer_result=transformer_result, v_rated_hv=v_rated_hv, v_rated_mv=v_rated_mv, v_rated_lv=v_rated_lv)
 
     return GridResultThreeWinding(
-        v_mv_pu=v_b_pu,
-        e_mv_pu=e_b_pu,
-        f_mv_pu=f_b_pu,
-        v_lv_pu=v_c_pu,
-        e_lv_pu=e_c_pu,
-        f_lv_pu=f_c_pu,
+        v_mv_pu=node_result_b.v_mag_pu,
+        v_ang_mv_degree=node_result_b.v_ang_degree,
+        v_lv_pu=node_result_c.v_mag_pu,
+        v_ang_lv_degree=node_result_c.v_ang_degree,
         p_hv_kw=p_a_kw,
         q_hv_kvar=q_a_kvar,
         s_hv_kva=s_a_kva,
@@ -49,18 +45,6 @@ def to_three_winding_result(node_result_a: NodeResult, node_result_b: NodeResult
         i_mag_lv_a=transformer_result.i_c_mag_ampere,
         i_ang_lv_degree=transformer_result.i_c_ang_degree
     )
-
-
-def _convert_nodal_results(node_result: NodeResult) -> (float, float, float):
-    """
-    Transform the nodal result into cartesian coordinates
-
-    :param node_result: The nodal result received from powersystemdatamodel
-    """
-    e_pu = node_result.v_mag_pu * cos(radians(node_result.v_ang_degree))
-    f_pu = node_result.v_mag_pu * sin(radians(node_result.v_ang_degree))
-
-    return node_result.v_mag_pu, e_pu, f_pu
 
 
 def _convert_transformer_3w_result(hv_node_result: NodeResult, mv_node_result: NodeResult, lv_node_result: NodeResult,

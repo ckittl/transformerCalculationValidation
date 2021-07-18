@@ -1,4 +1,4 @@
-from math import cos, pi, sin, sqrt, atan
+from math import sqrt
 
 import numpy as np
 import pandapower as pp
@@ -23,8 +23,7 @@ def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:
     # --- Medium voltage node ---
     # Nodal voltage
     v_mv_pu = net.res_bus.vm_pu[1]
-    e_mv_pu = v_mv_pu * cos(net.res_bus.va_degree[1] / 180 * pi)  # Real part of nodal voltage
-    f_mv_pu = v_mv_pu * sin(net.res_bus.va_degree[1] / 180 * pi)  # Imaginary part of nodal voltage
+    v_ang_mv_degree = net.res_bus.va_degree[1]
 
     # Power
     p_mv_kw = net.res_trafo3w.p_mv_mw[0] * 1000.0
@@ -33,14 +32,12 @@ def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:
 
     # Current at high voltage node
     i_mag_mv_a = net.res_trafo3w.i_mv_ka[0] * 1000.0
-    phi_v_mv_degree = atan(f_mv_pu / e_mv_pu) / pi * 180.0
-    i_ang_mv_degree = __calc_current_angle(p_mv_kw, q_mv_kvar, phi_v_mv_degree)
+    i_ang_mv_degree = __calc_current_angle(p_mv_kw, q_mv_kvar, v_ang_mv_degree)
 
     # --- Medium voltage node ---
     # Nodal voltage
     v_lv_pu = net.res_bus.vm_pu[2]
-    e_lv_pu = v_lv_pu * cos(net.res_bus.va_degree[2] / 180 * pi)  # Real part of nodal voltage
-    f_lv_pu = v_lv_pu * sin(net.res_bus.va_degree[2] / 180 * pi)  # Imaginary part of nodal voltage
+    v_ang_lv_degree = net.res_bus.va_degree[2]
 
     # Power
     p_lv_kw = net.res_trafo3w.p_lv_mw[0] * 1000.0
@@ -49,8 +46,7 @@ def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:
 
     # Current
     i_mag_lv_a = net.res_trafo3w.i_mv_ka[0] * 1000.0
-    phi_v_lv_degree = atan(f_lv_pu / e_lv_pu) / pi * 180.0
-    i_ang_lv_degree = __calc_current_angle(p_lv_kw, q_lv_kvar, phi_v_lv_degree)
+    i_ang_lv_degree = __calc_current_angle(p_lv_kw, q_lv_kvar, v_ang_lv_degree)
 
     # --- High voltage node ---
     # Power
@@ -62,10 +58,10 @@ def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:
     i_mag_hv_a = net.res_trafo3w.i_hv_ka[0] * 1000.0
     i_ang_hv_degree = __calc_current_angle(p_hv_kw, q_hv_kvar, 0.0)
 
-    return GridResultThreeWinding(v_mv_pu=v_mv_pu, e_mv_pu=e_mv_pu, f_mv_pu=f_mv_pu, v_lv_pu=v_lv_pu, e_lv_pu=e_lv_pu,
-                                  f_lv_pu=f_lv_pu, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar, s_hv_kva=s_hv_kva,
-                                  i_mag_hv_a=i_mag_hv_a, i_ang_hv_degree=i_ang_hv_degree, p_mv_kw=p_mv_kw,
-                                  q_mv_kvar=q_mv_kvar, s_mv_kva=s_mv_kva, i_mag_mv_a=i_mag_mv_a,
+    return GridResultThreeWinding(v_mv_pu=v_mv_pu, v_ang_mv_degree=v_ang_mv_degree, v_lv_pu=v_lv_pu,
+                                  v_ang_lv_degree=v_ang_lv_degree, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar,
+                                  s_hv_kva=s_hv_kva, i_mag_hv_a=i_mag_hv_a, i_ang_hv_degree=i_ang_hv_degree,
+                                  p_mv_kw=p_mv_kw, q_mv_kvar=q_mv_kvar, s_mv_kva=s_mv_kva, i_mag_mv_a=i_mag_mv_a,
                                   i_ang_mv_degree=i_ang_mv_degree, p_lv_kw=p_lv_kw, q_lv_kvar=q_lv_kvar,
                                   s_lv_kva=s_lv_kva, i_mag_lv_a=i_mag_lv_a, i_ang_lv_degree=i_ang_lv_degree)
 
@@ -97,8 +93,6 @@ class ThreeWindingTestBench(TestBench):
         tap_range: range = range(tap_min, tap_max + 1)
         p_mv_range_mw = [round(p_pu * s_nom_mv_mva) for p_pu in np.linspace(-1.0, 1.0, p_step)]  # Power range @ mv port
         p_step_lv_mw = 2 * s_nom_lv_mva / (p_step - 1)  # Bin width at the lv side
-        print("Power range in mv load:" + str(p_mv_range_mw))
-        print("Step size in lv load: %.3f" % p_step_lv_mw)
         self.logger.info(
             ("Starting to calculate grid with pandapower. Parameters: tap = %i...%i, reference = %.2f MVA @ %.2f kV, " %
              (tap_min, tap_max, s_ref_mva, v_ref_kv)) + "tap changer is" + (

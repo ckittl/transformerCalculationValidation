@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import os
 
 import powerfactory
@@ -105,6 +106,16 @@ p_mv_range = arange(-sr_mv_mva, sr_mv_mva + delta_p_mv, delta_p_mv)
 # Performing the calculations
 log(SeverityLevel.INFO, "Starting the power flow calculations")
 results = []
+
+
+def _calculate_angle(y: float, x: float) -> float:
+    angle = math.atan2(y, x)
+    if math.isnan(angle):
+        return math.copysign(90.0, y)
+    else:
+        return math.degrees(angle)
+
+
 for tap_pos in tap_range:
     log(SeverityLevel.INFO, "Sweeping through power consumption for tap position %i." % tap_pos)
     transformer.SetAttribute('n3tap_h', tap_pos)
@@ -133,9 +144,11 @@ for tap_pos in tap_range:
             v_mv_pu = node_mv.GetAttribute("m:u")  # All nodal voltages in p.u.
             e_mv_pu = node_mv.GetAttribute("m:ur")
             f_mv_pu = node_mv.GetAttribute("m:ui")
+            v_ang_mv_degree = _calculate_angle(f_mv_pu, e_mv_pu)
             v_lv_pu = node_lv.GetAttribute("m:u")
             e_lv_pu = node_lv.GetAttribute("m:ur")
             f_lv_pu = node_lv.GetAttribute("m:ui")
+            v_ang_lv_degree = _calculate_angle(f_lv_pu, e_lv_pu)
 
             p_hv_kw = transformer.GetAttribute("m:Psum:bushv") * 1000  # Comes in MW
             q_hv_kvar = transformer.GetAttribute("m:Qsum:bushv") * 1000  # Comes in MVAr
@@ -153,8 +166,8 @@ for tap_pos in tap_range:
             i_mag_lv_a = transformer.GetAttribute("m:I:buslv") * 1000
             i_ang_lv_degree = transformer.GetAttribute("m:phii:buslv")
 
-            result = GridResultThreeWinding(v_mv_pu=v_mv_pu, e_mv_pu=e_mv_pu, f_mv_pu=f_mv_pu, v_lv_pu=v_lv_pu,
-                                            e_lv_pu=e_lv_pu, f_lv_pu=f_lv_pu, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar,
+            result = GridResultThreeWinding(v_mv_pu=v_mv_pu, v_ang_mv_degree=v_ang_mv_degree, v_lv_pu=v_lv_pu,
+                                            v_ang_lv_degree=v_ang_lv_degree, p_hv_kw=p_hv_kw, q_hv_kvar=q_hv_kvar,
                                             s_hv_kva=s_hv_kva, i_mag_hv_a=i_mag_hv_a, i_ang_hv_degree=i_ang_hv_degree,
                                             p_mv_kw=p_mv_kw, q_mv_kvar=q_mv_kvar, s_mv_kva=s_mv_kva,
                                             i_mag_mv_a=i_mag_mv_a, i_ang_mv_degree=i_ang_mv_degree, p_lv_kw=p_lv_kw,

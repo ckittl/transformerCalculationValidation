@@ -1,12 +1,13 @@
 from math import cos, pi, sin, sqrt, atan
 
+import numpy as np
 import pandapower as pp
-from numpy import arange, ndarray
+from numpy import ndarray
 
 from tcv.calculation import TestHelper
+from tcv.calculation.pandapower.TestBench import TestBench, __calc_current_angle
 from tcv.calculation.pandapower.TestGrid import test_grid_three_winding
 from tcv.calculation.result.GridResultThreeWinding import GridResultThreeWinding
-from tcv.calculation.pandapower.TestBench import TestBench, __calc_current_angle
 
 
 def extract_results(net: pp.pandapowerNet = None) -> GridResultThreeWinding:
@@ -74,7 +75,7 @@ class ThreeWindingTestBench(TestBench):
         super().__init__()
 
     def calculate(self, tap_min: int = -10, tap_max: int = 10, s_nom_hv_mva: float = 300.0, s_nom_mv_mva: float = 300.0,
-                  s_nom_lv_mva: float = 100.0, p_step_pu: float = 0.1, v_ref_kv: float = 380.0,
+                  s_nom_lv_mva: float = 100.0, p_step: int = 11, v_ref_kv: float = 380.0,
                   s_ref_mva: float = 300.0, with_main_field_losses: bool = False,
                   tap_at_star_point: bool = False) -> list:
         """
@@ -86,7 +87,7 @@ class ThreeWindingTestBench(TestBench):
             s_nom_hv_mva (float): Nominal apparent power at the high voltage node
             s_nom_mv_mva (float): Nominal apparent power at the medium voltage node
             s_nom_lv_mva (float): Nominal apparent power at the low voltage node
-            p_step_pu (float): Step size to sweep over power range with respect to the nominal voltage of the port
+            p_step (float): Amount of ticks along each active power axis
             v_ref_kv (float): Reference voltage of the calculation
             s_ref_mva (float): Reference apparent power of the calculation
             with_main_field_losses (bool): True, if the main field losses may be considered
@@ -94,8 +95,10 @@ class ThreeWindingTestBench(TestBench):
         """
         # --- General information ---
         tap_range: range = range(tap_min, tap_max + 1)
-        p_step_mv_mva: float = s_nom_mv_mva * p_step_pu
-        p_step_lv_mva: float = s_nom_lv_mva * p_step_pu
+        p_mv_range_mw = [round(p_pu * s_nom_mv_mva) for p_pu in np.linspace(-1.0, 1.0, p_step)]  # Power range @ mv port
+        p_step_lv_mw = 2 * s_nom_lv_mva / (p_step - 1)  # Bin width at the lv side
+        print("Power range in mv load:" + str(p_mv_range_mw))
+        print("Step size in lv load: %.3f" % p_step_lv_mw)
         self.logger.info(
             ("Starting to calculate grid with pandapower. Parameters: tap = %i...%i, reference = %.2f MVA @ %.2f kV, " %
              (tap_min, tap_max, s_ref_mva, v_ref_kv)) + "tap changer is" + (
@@ -107,11 +110,10 @@ class ThreeWindingTestBench(TestBench):
         # --- Iterate through tap positions ---
         for tap_pos in tap_range:
             # --- Iterate over medium voltage load ---
-            for p_mv_mw in arange(-s_nom_mv_mva, s_nom_mv_mva + p_step_mv_mva, p_step_mv_mva):
+            for p_mv_mw in p_mv_range_mw:
                 # --- Figure out permissible power range for low voltage load and iterate over it
-                p_lv_range_mw: ndarray = TestHelper.permissible_power_range_lv(s_nom_hv_mva, s_nom_lv_mva,
-                                                                               p_mv_mw,
-                                                                               p_step_lv_mva)
+                p_lv_range_mw: ndarray = TestHelper.permissible_power_range_lv(s_nom_hv_mva, s_nom_lv_mva, p_mv_mw,
+                                                                               p_step_lv_mw)
                 self.logger.debug(
                     "Power range for low voltage load is from %.2f...%.2f MW (medium voltage load is at %.2f MW)" % (
                         min(p_lv_range_mw), max(p_lv_range_mw), p_mv_mw))

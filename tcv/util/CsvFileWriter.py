@@ -1,6 +1,5 @@
 import csv
 import json
-import math
 import os
 import re
 
@@ -36,27 +35,14 @@ def write_three_winding_results(result_json_path: str, csv_file_path: str, p_nom
 
 
 def _convert_dict(result_dict: dict, p_nom_mv_mw: float, p_nom_lv_mw: float) -> dict:
-    # Determine the voltage angle
-    e_mv_pu = result_dict['result'].e_mv_pu
-    f_mv_pu = result_dict['result'].f_mv_pu
-    v_ang_mv_pu = _calculate_angle(f_mv_pu, e_mv_pu)
-
-    e_lv_pu = result_dict['result'].e_lv_pu
-    f_lv_pu = result_dict['result'].f_lv_pu
-    v_ang_lv_pu = _calculate_angle(f_lv_pu, e_lv_pu)
-
     return {
         'tap_pos': result_dict['tap_pos'],
         'p_mv_pu': result_dict['p_mv'] / p_nom_mv_mw,
         'p_lv_pu': result_dict['p_lv'] / p_nom_lv_mw,
         'v_mag_mv_pu': result_dict['result'].v_mv_pu,
-        'v_ang_mv_degree': v_ang_mv_pu,
-        'e_mv_pu': e_mv_pu,
-        'f_mv_pu': f_mv_pu,
+        'v_ang_mv_degree': result_dict['result'].v_ang_mv_degree,
         'v_mag_lv_pu': result_dict['result'].v_lv_pu,
-        'v_ang_lv_degree': v_ang_lv_pu,
-        'e_lv_pu': e_lv_pu,
-        'f_lv_pu': f_lv_pu
+        'v_ang_lv_degree': result_dict['result'].v_ang_mv_degree,
     }
 
 
@@ -74,21 +60,9 @@ def _empty_result(tap_pos: int, p_mv_pu: float, p_lv_pu: float) -> dict:
         'p_lv_pu': p_lv_pu,
         'v_mag_mv_pu': 'nan',
         'v_ang_mv_degree': 'nan',
-        'e_mv_pu': 'nan',
-        'f_mv_pu': 'nan',
         'v_mag_lv_pu': 'nan',
         'v_ang_lv_degree': 'nan',
-        'e_lv_pu': 'nan',
-        'f_lv_pu': 'nan'
     }
-
-
-def _calculate_angle(y: float, x: float) -> float:
-    angle = math.atan2(y, x)
-    if math.isnan(angle):
-        return math.copysign(90.0, y)
-    else:
-        return math.degrees(angle)
 
 
 def write_for_pgf_surf_plot(p_mv_tick_num: int, p_mv_rated_mw: float, p_lv_tick_num: int, p_lv_rated_mw: float,
@@ -126,9 +100,8 @@ def write_for_pgf_surf_plot(p_mv_tick_num: int, p_mv_rated_mw: float, p_lv_tick_
             # Prepare writing to file
             with open(out_file_path, 'w') as file_to_write:
                 file_to_write.write(col_sep.join(
-                    ['tap_pos', 'p_mv_pu', 'p_lv_pu', 'v_mag_mv_pu', 'v_ang_mv_degree', 'e_mv_pu', 'f_mv_pu',
-                     'v_mag_lv_pu',
-                     'v_ang_lv_degree', 'e_lv_pu', 'f_lv_pu']))
+                    ['tap_pos', 'p_mv_pu', 'p_lv_pu', 'v_mag_mv_pu', 'v_ang_mv_degree', 'v_mag_lv_pu',
+                     'v_ang_lv_degree']))
                 file_to_write.write("\n")
 
                 for block in zip(p_mv_grid, p_lv_grid):

@@ -3,6 +3,7 @@ import logging
 import math
 import os
 
+import numpy as np
 import powerfactory
 from numpy import arange
 
@@ -69,10 +70,11 @@ dpf['app'].PrintPlain("Active Project: %s" % str(dpf['active_project']))
 dpf['script'] = dpf['app'].GetCurrentScript()
 
 # Get configuration from script object
-err, p_step_pu = dpf['script'].GetInputParameterDouble('p_step')
+err, p_step_in = dpf['script'].GetInputParameterDouble('p_step')
 if err == 1:
     raise ValueError('Unable to load input parameter \"p_step\"')
-log(SeverityLevel.INFO, "Your test bench configuration:\n\tp_step: %.2f p.u." % p_step_pu)
+p_step = int(p_step_in)
+log(SeverityLevel.INFO, "Your test bench configuration:\n\tMedium voltage is varied with %i steps" % p_step)
 
 # Get needed information from grid structure
 transformer = dpf['app'].GetCalcRelevantObjects("three_winding_transformer.ElmTr3")[0]
@@ -99,9 +101,8 @@ log(SeverityLevel.INFO, "Load at low voltage port: %s" % str(load_lv))
 
 # Deriving additional information
 tap_range = range(tap_min, tap_max + 1)
-delta_p_mv = sr_mv_mva * p_step_pu
-delta_p_lv = sr_lv_mva * p_step_pu
-p_mv_range = arange(-sr_mv_mva, sr_mv_mva + delta_p_mv, delta_p_mv)
+p_mv_range_mw = [round(p_pu * sr_mv_mva) for p_pu in np.linspace(-1.0, 1.0, p_step)]  # Power range @ mv port
+p_step_lv_mw = 2 * sr_lv_mva / (p_step - 1)  # Bin width at the lv side
 
 # Performing the calculations
 log(SeverityLevel.INFO, "Starting the power flow calculations")
@@ -121,12 +122,12 @@ for tap_pos in tap_range:
     transformer.SetAttribute('n3tap_h', tap_pos)
 
     # Sweep through medium voltage power
-    for p_mv_mw in p_mv_range:
+    for p_mv_mw in p_mv_range_mw:
         log(SeverityLevel.DEBUG, "Setting medium voltage load to %.1f MW" % p_mv_mw)
         load_mv.SetAttribute('plini', p_mv_mw)
 
         # Determine the permissible power range for the low voltage side
-        p_lv_range = permissible_power_range_lv(sr_hv_mva, sr_lv_mva, p_mv_mw, delta_p_lv)
+        p_lv_range = permissible_power_range_lv(sr_hv_mva, sr_lv_mva, p_mv_mw, p_step_lv_mw)
 
         # Sweep through low voltage power
         for p_lv_mw in p_lv_range:

@@ -105,7 +105,6 @@ def write_for_pgf_surf_plot(p_mv_tick_num: int, p_mv_rated_mw: float, p_lv_tick_
                 file_to_write.write("\n")
 
                 for block in zip(p_mv_grid, p_lv_grid):
-                    print("Starting new block")
                     for p_mv_pu, p_lv_pu in zip(block[0], block[1]):
                         # Round to the first decimal place
                         p_mv_pu = round(p_mv_pu * 10) / 10
@@ -118,19 +117,16 @@ def write_for_pgf_surf_plot(p_mv_tick_num: int, p_mv_rated_mw: float, p_lv_tick_
                             result = next(entry for entry in results if
                                           (entry['p_mv'] == p_mv_mw and entry['p_lv'] == p_lv_mw and entry[
                                               'tap_pos'] == tap_pos))
-                            print("We found a result")
                             csv_dict = _convert_dict(result_dict=result, p_nom_mv_mw=p_mv_rated_mw,
                                                      p_nom_lv_mw=p_lv_rated_mw)
                             file_to_write.write(col_sep.join(map(lambda val: str(val), csv_dict.values())))
                             file_to_write.write("\n")
                         except StopIteration:
-                            print("No result found")
                             csv_dict = _empty_result(tap_pos, p_mv_pu, p_lv_pu)
                             file_to_write.write(col_sep.join(map(lambda val: str(val), csv_dict.values())))
                             file_to_write.write("\n")
                         except Exception as e:
                             print("Other error: %s" % e)
                     file_to_write.write("\n")
-                    print("\n")
     else:
         raise IOError("Unable to open result file '%s'." % result_json_path)

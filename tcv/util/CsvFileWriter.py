@@ -110,7 +110,6 @@ def write_for_pgf_surf_plot(p_mv_tick_num: int, p_mv_rated_mw: float, p_lv_tick_
                         p_mv_pu = round(p_mv_pu * 10) / 10
                         p_lv_pu = round(p_lv_pu * 10) / 10
 
-                        print("x = %.3f, y = %.3f" % (p_mv_pu, p_lv_pu))
                         p_mv_mw = p_mv_pu * p_mv_rated_mw
                         p_lv_mw = p_lv_pu * p_lv_rated_mw
                         try:

@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from tcv.calculation.powersystemdatamodel.model import LoadResult
 from tcv.calculation.powersystemdatamodel.model import NodeResult, Transformer3WResult
+from tcv.calculation.powersystemdatamodel.model import Transformer2WResult
 
 
 class TimeSeriesResult:
@@ -42,11 +43,11 @@ class TimeSeriesResult:
                 self.load_results[load_result.time].append(load_result)
 
         # Handling the two winding transformer results
-        # if os.path.exists(transformer_2w_result_file):
-        #     with open(transformer_2w_result_file, mode='r') as transformer_2w_lines:
-        #         for dct in csv.DictReader(transformer_2w_lines, delimiter=delimiter):
-        #             transformer_result = LoadResult.from_dict(dct)
-        #             self.load_results[transformer_result.time].append(transformer_result)
+        if os.path.exists(transformer_2w_result_file):
+            with open(transformer_2w_result_file, mode='r') as transformer_2w_lines:
+                for dct in csv.DictReader(transformer_2w_lines, delimiter=delimiter):
+                    transformer_result = Transformer2WResult.from_dict(dct)
+                    self.transformer_2w_results[transformer_result.time].append(transformer_result)
 
         # Handling the transformer three winding results
         if os.path.exists(transformer_3w_result_file):

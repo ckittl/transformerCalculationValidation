@@ -24,12 +24,12 @@ def from_dict(dct: dict) -> Transformer3WResult:
     return Transformer3WResult(
         uuid_module.UUID(dct['uuid']),
         dateutil.parser.isoparse(re.sub('\\[UTC]$', "", dct['time'])),
-        uuid_module.UUID(dct['inputModel']),
-        float(dct['iAAng']),
-        float(dct['iBAng']),
-        float(dct['iCAng']),
-        float(dct['iAMag']),
-        float(dct['iBMag']),
-        float(dct['iCMag']),
-        int(dct['tapPos'])
+        uuid_module.UUID(dct['input_model']),
+        float(dct['i_a_ang']),
+        float(dct['i_b_ang']),
+        float(dct['i_c_ang']),
+        float(dct['i_a_mag']),
+        float(dct['i_b_mag']),
+        float(dct['i_c_mag']),
+        int(dct['tap_pos'])
     )

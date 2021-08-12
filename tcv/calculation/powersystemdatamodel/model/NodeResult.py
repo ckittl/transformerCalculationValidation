@@ -19,7 +19,7 @@ def from_dict(dct: dict) -> NodeResult:
     return NodeResult(
         uuid_module.UUID(dct['uuid']),
         dateutil.parser.isoparse(re.sub('\\[UTC]$', "", dct['time'])),
-        uuid_module.UUID(dct['inputModel']),
-        float(dct['vAng']),
-        float(dct['vMag'])
+        uuid_module.UUID(dct['input_model']),
+        float(dct['v_ang']),
+        float(dct['v_mag'])
     )

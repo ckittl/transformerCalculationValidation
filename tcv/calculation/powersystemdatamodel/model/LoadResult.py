@@ -19,7 +19,7 @@ def from_dict(dct: dict) -> LoadResult:
     return LoadResult(
         uuid_module.UUID(dct['uuid']),
         dateutil.parser.isoparse(re.sub('\\[UTC]$', "", dct['time'])),
-        uuid_module.UUID(dct['inputModel']),
+        uuid_module.UUID(dct['input_model']),
         float(dct['p']),
         float(dct['q'])
     )

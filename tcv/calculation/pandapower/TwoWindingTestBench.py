@@ -95,9 +95,8 @@ class TwoWindingTestBench(TestBench):
             for p in p_range:
                 # Perform the calculation
                 self.logger.debug(
-                    "Power flow with tap position = %i and p = %.3f p.u. (%3.f MW)" % (
-                        tap_pos, p, p * s_nom_mva))
-                net = test_grid_two_winding(tap_pos, p * s_nom_mva, s_ref_mva, tap_side)
+                    "Power flow with tap position = %i and p = %.3f MW)" % (tap_pos, p))
+                net = test_grid_two_winding(tap_pos, p, s_ref_mva, tap_side)
                 pp.runpp(net, trafo_model=transformer_model.value)
 
                 # Extract the result of this model run

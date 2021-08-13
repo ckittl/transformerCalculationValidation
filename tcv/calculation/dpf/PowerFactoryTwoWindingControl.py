@@ -91,8 +91,8 @@ log(SeverityLevel.INFO, "Load at low voltage port: %s" % str(load_lv))
 
 # Deriving additional information
 tap_range = range(tap_min, tap_max + 1)
-# Round the power to 10 kW-precision
-p_range_mw = [round(p_pu * sr_mva * 100) / 100 for p_pu in np.linspace(-1.0, 1.0, p_step)]  # Power range @ lv port
+# Round the power to kW-precision
+p_range_mw = [round(p_pu * sr_mva * 1e3) / 1e3 for p_pu in np.linspace(-1.0, 1.0, p_step)]  # Power range @ lv port
 
 # Performing the calculations
 log(SeverityLevel.INFO, "Starting the power flow calculations")

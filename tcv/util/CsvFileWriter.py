@@ -177,7 +177,6 @@ def write_for_pgf_line_plot(p_lv_tick_num: int, p_lv_rated_mw: float, tap_range:
                         file_to_write.write("\n")
                     except Exception as e:
                         print("Other error: %s" % e)
-                    file_to_write.write("\n")
     else:
         raise IOError("Unable to open result file '%s'." % result_json_path)
 

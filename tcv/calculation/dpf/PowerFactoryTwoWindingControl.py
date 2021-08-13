@@ -58,7 +58,7 @@ logger.addHandler(file_handler)
 
 # Prepare information about output file
 result_directory = os.path.join("..", "..", "..", "results", "two_winding")
-result_file = os.path.join(result_directory, "dpf_tapHv.json")
+result_file = os.path.join(result_directory, "dpf_tapLv.json")
 
 # Get the PowerFactory object
 dpf = {'app': powerfactory.GetApplication()}
